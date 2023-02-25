@@ -1,3 +1,4 @@
+#![feature(fs_try_exists)]
 use git2::Repository;
 use git2::build::CheckoutBuilder;
 use std::env;
@@ -5,7 +6,6 @@ use std::process::Command;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-
     match args.len()
     {
         1 => panic!("local repository의 path를 입력하세요!"),
@@ -14,7 +14,7 @@ fn main() {
             let mut revwalk = repo.revwalk().unwrap();
             revwalk.push_head().expect("HEAD 브랜치를 찾을 수 없습니다!");
             revwalk.set_sorting(   git2::Sort::REVERSE | git2::Sort::TIME).expect("err");
-            let mut index = 0;
+            let mut index = 3700;
 
             for i in revwalk
             {
@@ -26,42 +26,30 @@ fn main() {
                                 .conflict_style_diff3(true)
                             ))
                     .expect("Repository가 잠금 되어있어 바꿀 수 없습니다.");
-                let test_command = Command::new("pytest")
-                .arg("--cov")
-                .current_dir(&args[1])
-                .output()
-                .expect("pytest-cov를 설치해주세요!");
-            
-            let cov_info = String::from_utf8(test_command.stdout).unwrap();
-            let mut iter = 0;
-            let mut metrics = Vec::with_capacity(8);
-            for token in cov_info.split_ascii_whitespace()
-            {                    
-                if iter != 0
-                {
-                    metrics.push(String::from(token));
-                    iter = (iter + 1) % 6;
-                }
 
-                if token== "TOTAL"
+                let is_exist = std::fs::try_exists(format!("{}/pom.xml", &args[1])).unwrap();
+                if is_exist
                 {
-                    iter = (iter + 1) % 6;
+                    println!("try[{}] : {}", index, oid.to_string());
+                    Command::new("mvn")
+                    .arg("test")
+                    .arg("jacoco:report")
+                    .arg("--file")
+                    .arg("pom.xml")
+                    .arg("--no-transfer-progress")
+                    .current_dir(&args[1])
+                    .output()
+                    .unwrap();
+                    std::fs::rename(format!("{}/target/site/jacoco", &args[1]), format!("{}/target/site/jacoco{}", &args[1], index)).unwrap();
                 }
-            }
-
-           for metric in metrics
-           {
-                if metric.contains("%")
-                {
-                    println!("{} : {}", oid.to_string(), metric);
+                else {
+                    println!("skip[{}] : {}", index, oid.to_string());
                 }
-           }
-                index = index + 1;
+            index = index + 1;
             }
  
         },
         _ => panic!("알 수 없습니다!")
     }
 
-   
 }
