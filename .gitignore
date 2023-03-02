@@ -1,2 +1,4 @@
 /target
 /commons-collections
+/coverage_reports
+.DS_Store
