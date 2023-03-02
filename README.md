@@ -1,13 +1,27 @@
 # Todo
-## Environment
+## Preset environment
   - cargo
   - rustup
   - maven cli
 ## Step
-  - 
-    1. git clone https://github.com/UsQuake/rocket_coverage.git
-    2. cd path/to/rocket/coverage/clone
-    3. git clone https://github.com/apache/commons-collections.git
-    4. mkdir coverage_reports
-    5. cargo run commons-collections
+  - Clone repository.
+    ```
+    git clone https://github.com/UsQuake/rocket_coverage.git
+    ```
+  - Open repository directory.
+    ```
+    cd path/to/rocket/coverage/clone
+    ```
+  - Clone commons-collections repository under rocket coverage repository directory.
+    ```
+    git clone https://github.com/apache/commons-collections.git
+    ```
+  - Make a directory to store coverage reports.
+    ```
+    mkdir coverage_reports
+    ```
+  - Run a script.
+    ```
+    cargo run commons-collections
+    ```
   
